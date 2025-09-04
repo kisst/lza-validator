@@ -13,8 +13,9 @@ fi
 cd landing-zone-accelerator-on-aws
 git checkout main
 git pull
-tags=$(git tag)
-latest_n_releases=$(echo $tags | rev | cut -d ' ' -f 1-$n | rev)
+# Filter for stable releases only (exclude alpha, beta, rc, experimental, pre-release versions)
+stable_tags=$(git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V)
+latest_n_releases=$(echo $stable_tags | rev | cut -d ' ' -f 1-$n | rev)
 cd ..
 
 for release in $latest_n_releases; do
