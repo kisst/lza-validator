@@ -16,9 +16,10 @@ jobs:
       - name: Get latest LZA release tag
         id: get-tag
         run: |
-          latest_tag=$(git ls-remote --tags --sort=-v:refname \
+          latest_tag=$(git ls-remote --tags \
             https://github.com/awslabs/landing-zone-accelerator-on-aws.git \
-            | head -1 | sed 's|.*refs/tags/||')
+            | sed -n 's|.*refs/tags/\(v[0-9]*\.[0-9]*\.[0-9]*\)$|\1|p' \
+            | sort -V | tail -1)
           echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
           echo "Latest LZA tag: $latest_tag"
 
@@ -61,7 +62,5 @@ jobs:
       - name: Build and push
         run: |
           tag="${{ needs.check-release.outputs.latest_tag }}"
-          docker build --tag "kisst/lza-validator:${tag}" \
-                       --tag "kisst/lza-validator:latest" .
+          docker build --tag "kisst/lza-validator:${tag}" .
           docker push "kisst/lza-validator:${tag}"
-          docker push "kisst/lza-validator:latest"
